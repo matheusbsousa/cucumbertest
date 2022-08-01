@@ -1,0 +1,30 @@
+apply plugin: 'org.unbroken-dome.test-sets'
+
+testSets{
+    isolationTest{
+        dirName = 'isolation-test'
+    }
+}
+
+configurations {
+    isolationTestImplementations.extendsFrom testImplementation
+    isolationTestRuntimeOnly.extendsFrom testRuntimeOnly
+
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
+}
+
+task cucumber() {
+    dependsOn assemble, testClasses
+    doLast {
+        javaexec {
+            main = "io.cucumber.core.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.isolationTest.output
+            args = ['--plugin', 'pretty', '--glue', 'com.example.cucumbertest', 'src/isolation-test/resources']
+        }
+    }
+}
+
+check.dependsOn isolationTest
+//isolationTest.mustRunAfter test
